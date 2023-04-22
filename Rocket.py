@@ -3,25 +3,37 @@ import numpy as np
 
 
 class Rocket:
-
     def __init__(self, name):
         self.name = name
-        self.forces = [0,0,0]
-        self.momenta = [0,0,0]
-        self.state = [0,0,0,0,0,0]
+        self.F = np.zeros((3,1))
+        self.M = np.zeros((3,1))
+        self.inputs = np.zeros(3)
 
     def load(self):
         #self.Iz = 1/2*self.mass*(self.radius**2)
         self.Iy = self.mass * (self.radius**2 / 4 + self.height**2 / 12)
 
-    def input(self,thrust,thrust_angle):
-        Fx = self.max_thrust * thrust * np.sin(thrust_angle)
-        Fy = 0 #Fy = self.max_thrust * thrust * np.sin(np.abs(thrust_angle1)) * np.cos(thrust_angle2)
-        Fz = self.max_thrust * thrust * np.cos(thrust_angle)
-        
-        Mx = 0
-        My = self.max_thrust * thrust * np.sin(thrust_angle) * self.cg_thrust_length
-        Mz = 0
+        self.inertia = np.array([[self.Iy, 0, 0],
+                                [0, self.Iy, 0],
+                                [0, 0, self.Iy]])
+    def input(self,thrust,alpha,beta):
+        self.thrust = thrust
+        self.alpha = alpha
+        self.beta = beta
+        self.inputs = [self.thrust,alpha,beta]
 
-        self.forces = [Fx,Fy,Fz]
-        self.momenta = [Mx,My,Mz]
+    def updateForces(self):
+        Fx = self.max_thrust * self.thrust * np.sin(self.alpha) * np.cos(self.beta)
+        Fy = self.max_thrust * self.thrust * np.sin(self.alpha) * np.sin(self.beta)
+        Fz = self.max_thrust * self.thrust * np.cos(self.alpha)
+        self.F = np.array([Fx,Fy,Fz])
+
+    def updateMomenta(self):
+        Mx = self.max_thrust * self.thrust * np.sin(self.alpha) * self.cg_thrust_length * np.sin(self.beta)
+        My = self.max_thrust * self.thrust * np.sin(self.alpha) * self.cg_thrust_length * np.cos(self.beta)
+        Mz = 0
+        self.M = np.array([Mx,My,Mz])
+
+    def update(self):
+        self.updateForces()
+        self.updateMomenta()
