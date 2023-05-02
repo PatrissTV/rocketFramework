@@ -53,7 +53,10 @@ class Plot3D:
         self.ax.set_xlabel('X')
         self.ax.set_ylabel('Y')
         self.ax.set_zlabel('Z')
+
+        #make grid equal sized
         self.ax.set_aspect('equal')
+
 
     def attitude(self):
         for j in range(round(len(self.states)/self.step)):
@@ -62,3 +65,24 @@ class Plot3D:
                 quat = state[6:10]
                 vec = Quat.intertialRotate(quat,[0,0,1])
                 self.ax.quiver(state[0], state[1], state[2], vec[0], vec[1], vec[2], length=self.arrowlength, normalize=True, color='blue')
+
+    def attitudeGraph(self):
+        roll = []
+        pitch = []
+        yaw = []
+
+        for j in range(round(len(self.states))):
+                i = j
+                state = self.states[i]
+                quat = state[6:10]
+                euler = Quat.eulerAngles2(quat)
+                roll.append(euler[0])
+                pitch.append(euler[1])
+                yaw.append(euler[2])
+
+        plt.plot(roll)
+        plt.figure()
+        plt.plot(pitch)
+        plt.figure()
+        plt.plot(yaw)
+        plt.legend(['roll','pitch','yaw'])

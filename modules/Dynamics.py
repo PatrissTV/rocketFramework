@@ -1,7 +1,7 @@
 from scipy.integrate import solve_ivp
 import numpy as np
 
-from Quat import Quat
+from modules.Quat import Quat
 
 
 class Dynamics:
@@ -25,16 +25,16 @@ class Dynamics:
                 W = np.array([omega_x,omega_y,omega_z])
 
                 dX = V
-                dV = Quat.intertialRotate(Q,self.rocket.F) / self.rocket.mass + self.externalForces()/self.rocket.mass
+                dV = Quat.intertialRotate(Q,self.rocket.F) / self.rocket.mass# + self.externalForces()/self.rocket.mass
                 dW = np.linalg.inv(self.rocket.inertia) @ (self.rocket.M - np.cross(W, self.rocket.inertia @ W))
-                print("dW",dW)
+                #print("dW",dW)
                 dQ = 0.5 * np.array([[0,-W[0], -W[1], -W[2]],
                                         [W[0], 0, W[2], -W[1]],
                                         [W[1], -W[2], 0, W[0]],
                                         [W[2], W[1], -W[0], 0]]) @ Q
                 
                 newState = np.concatenate((dX,dV,dQ,dW))
-                self.ground(state,newState)
+                #self.ground(state,newState)
 
                 return newState
                 

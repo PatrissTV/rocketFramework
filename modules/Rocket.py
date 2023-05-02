@@ -1,6 +1,6 @@
 import numpy as np
 
-from Quat import Quat
+from modules.Quat import Quat
 
 rho = 1.293 #kg/m^3
 
@@ -10,15 +10,15 @@ class Rocket:
         self.name = name
         self.F = np.zeros((3,1))
         self.M = np.zeros((3,1))
-        self.inputs = np.zeros(3)
 
     def load(self):
         self.Aref = np.pi * self.radius**2
         #self.Iz = 1/2*self.mass*(self.radius**2)
-        self.Iy = self.mass * (self.radius**2 / 4 + self.height**2 / 12)
-        self.inertia = np.array([[self.Iy, 0, 0],
-                                [0, self.Iy, 0],
-                                [0, 0, self.Iy]])
+        Js = 1/12*(self.mass*self.height**2)
+        Jz = (self.radius*2)**2*(self.mass)/8
+        self.inertia = np.array([[Js, 0, 0],
+                                [0, Js, 0],
+                                [0, 0, Jz]])
     def input(self,thrust,alpha,beta):
         self.thrust = thrust
         self.alpha = alpha
@@ -29,14 +29,20 @@ class Rocket:
         Tz = self.max_thrust * self.thrust * np.cos(self.alpha)
         self.T = [Tx,Ty,Tz]
 
+    def inputVec(self,Tx,Ty,Tz):
+        self.T = [Tx,Ty,Tz]
+
+    def inputNpVec(self,T):
+        self.T = [T[0,0],T[1,0],T[2,0]]
+
     def updateForces(self):
-        self.F = self.T + self.Df
+        self.F = self.T #+ self.Df
 
     def updateMomenta(self):
         self.M = self.cross(np.array([0,0,-self.cg_thrust_length]),self.T)
-        print("M",self.M)
-        self.M = self.M + self.cross(np.array([0,0,self.cg_cp_length]),self.Df)
-        print("Cross",self.cross(np.array([0,0,self.cg_cp_length]),self.Df))
+        #print("M",self.M)
+        #self.M = self.M + self.cross(np.array([0,0,self.cg_cp_length]),self.Df)
+        #print("Cross",self.cross(np.array([0,0,self.cg_cp_length]),self.Df))
 
     def update(self,state):
         self.state = state
